@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4">
+    <h1 class="text-2xl font-semibold text-center">PDF Analyzer</h1>
+
+    <!-- File Upload -->
+    <input
+      id="pdfInput"
+      type="file"
+      accept="application/pdf"
+      class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+    />
+
+    <!-- Email input -->
+    <input
+      id="emailInput"
+      type="email"
+      placeholder="Optional: Enter your email"
+      class="block w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200"
+    />
+
+    <!-- Submit Button -->
+    <button
+      onclick="uploadPDF()"
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
+    >
+      Analyze PDF
+    </button>
+
+    <!-- Result -->
+    <div id="resultContainer" class="mt-4 text-center text-lg text-green-600 font-medium"></div>
+  </div>
+
+  <script>
+    async function uploadPDF() {
+      const fileInput = document.getElementById("pdfInput");
+      const email = document.getElementById("emailInput").value;
+      const resultContainer = document.getElementById("resultContainer");
+
+      if (!fileInput.files.length) {
+        alert("Please upload a PDF file.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      if (email) formData.append("email", email);
+
+      resultContainer.textContent = "Processing...";
+
+      try {
+        const response = await fetch("/analyze-pdf", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          resultContainer.textContent = `Result: ${data.result}`;
+        } else {
+          resultContainer.textContent = `Error: ${data.error || "Something went wrong."}`;
+        }
+      } catch (error) {
+        resultContainer.textContent = "Failed to connect to server.";
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
+
